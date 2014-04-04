@@ -17,7 +17,7 @@ Try adding another listener by pressing the button!";
     public void OnGUI()
     {
         GUI.TextField(new Rect(0, 0, 1000, 800), 
-@"You can send global messenges like this, everyone who registered for the message in the current scene will get it. 
+@"You can send global messages like this, everyone who registered for the message in the current scene will get it. 
 There are many reasons why you would want to use this over the other options you have available:
 
 1. It decouples your sending code from your receiving code and encapsulation of the client code itself. For example;
@@ -25,7 +25,7 @@ There are many reasons why you would want to use this over the other options you
    (for example, different types of health scripts) you do not have to remember to modify the weapon script to look for these 
    new types. Everything is done client side (the new health script implements a handle for the damage-message, and you're done). 
    Refactoring communication code has never been this easy. 
-   It also promotes reuseability, since your components only need to know their input / output messenges, and hold very few direct references. 
+   It also promotes reuseability, since your components only need to know their input / output messages, and hold very few direct references. 
    This means it is very easy to move a complete component between projects.
 2. Easy to test since you can mock simply by sending dummy messages.
 3. It is MUCH faster, since almost everything here is cached, and it is only ever bothering objects that are interested.
