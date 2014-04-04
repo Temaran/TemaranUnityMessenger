@@ -1,5 +1,9 @@
-﻿public class ExampleMessage
+﻿/// <summary>
+/// A very simple example message
+/// </summary>
+public class ExampleMessage
 {
+    //Some example data...
     public string CrazyReason { get; set; }
     public object SomeImportantContext { get; set; }
 

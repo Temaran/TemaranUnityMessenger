@@ -4,6 +4,7 @@
 // PARTICULAR PURPOSE.
 //
 // Created by Fredrik Lindh (Temaran)
+// Contact me at: temaran (at) gmail (dot) com
 // Last changed: 2014-03-15
 // You're free to do whatever you want with the code except claiming it's you who wrote it.
 // I would also appreciate it if you kept this file header as a thank you for the code :)
@@ -23,11 +24,21 @@ public class EventAggregator : IEventAggregator
     /// </summary>
     readonly Dictionary<Type, List<Handler>> _handlers = new Dictionary<Type, List<Handler>>();
 
+    /// <summary>
+    /// Searches the subscribed handlers to check if we have a handler for
+    /// the message type supplied.
+    /// </summary>
+    /// <param name="messageType">The message type to check with</param>
+    /// <returns>True if any handler is found, false if not.</returns>
     public bool HandlerExistsFor(Type messageType)
     {
         return _handlers.ContainsKey(messageType) && _handlers[messageType].Any(handler => !handler.IsDead);
     }
 
+    /// <summary>
+    ///   Subscribes an instance to all events declared through implementations of <see cref = "IHandle{T}" />
+    /// </summary>
+    /// <param name = "subscriber">The instance to subscribe for event publication.</param>
     public virtual void Subscribe(MonoBehaviourEx subscriber)
     {
         if (subscriber == null)
@@ -56,6 +67,10 @@ public class EventAggregator : IEventAggregator
         }
     }
 
+    /// <summary>
+    ///   Unsubscribes the instance from all events.
+    /// </summary>
+    /// <param name = "subscriber">The instance to unsubscribe.</param>
     public virtual void Unsubscribe(MonoBehaviourEx subscriber)
     {
         if (subscriber == null)
@@ -76,7 +91,17 @@ public class EventAggregator : IEventAggregator
         }
     }
 
+    /// <summary>
+    ///   Publishes a message.
+    /// </summary>
+    /// <param name = "message">The message instance.</param>
     public void Publish(object message) { Publish(message, null); }
+
+    /// <summary>
+    ///   Publishes a message.
+    /// </summary>
+    /// <param name = "message">The message instance.</param>
+    /// <param name = "commonRoot">If the common root parameter is not null, the publisher requires that only subscribers who are a decendent of this particular transform can process the message.</param>
     public virtual void Publish(object message, Transform commonRoot)
     {
         //Remove this check if you want an itsy bit of more performance if feel comfortable enough with the code :)
@@ -133,15 +158,29 @@ public class EventAggregator : IEventAggregator
         }
     }
 
+    /// <summary>
+    /// This class is a helper for the messenger, and keeps track on which objects are interested in which message types
+    /// </summary>
     private class Handler
     {
-        private readonly Action<object, object> _handleDelegate;
-        private readonly WeakReference _reference;
-
+        /// <summary>
+        /// This is true if our target was garbage collected. In this case, this handle is not needed anymore
+        /// </summary>
         public bool IsDead { get { return ReferenceTarget == null; } }
 
+        /// <summary>
+        /// This is the object our handle is taking care of.
+        /// </summary>
         private MonoBehaviourEx ReferenceTarget { get { return _reference.Target as MonoBehaviourEx; } }
-
+        
+        private readonly Action<object, object> _handleDelegate;
+        private readonly WeakReference _reference;
+        
+        /// <summary>
+        /// Create a new handler
+        /// </summary>
+        /// <param name="handler">The object that is interested in a message</param>
+        /// <param name="interfaceType">The message type the object is interested in</param>
         public Handler(object handler, Type interfaceType)
         {
             _reference = new WeakReference(handler);
@@ -156,11 +195,21 @@ public class EventAggregator : IEventAggregator
             _handleDelegate = (Action<object, object>)constructedHelper.Invoke(null, new object[] { methodInfo });
         }
 
+        /// <summary>
+        /// Checks to see if this handle is pointing towards a certain monobehaviour
+        /// </summary>
+        /// <param name="instance">Is this instance the same as the one this handle is handling requests for?</param>
+        /// <returns>True if they are the same</returns>
         public bool Matches(MonoBehaviourEx instance)
         {
             return ReferenceTarget == instance;
         }
 
+        /// <summary>
+        /// Checks to see if this handles reference target has the requested transform as ancestor
+        /// </summary>
+        /// <param name="commonRoot">The transform to check ancestry for</param>
+        /// <returns>True if the commonRoot transform is an ancestor to our reference target</returns>
         public bool SharesCommonTransformRoot(Transform commonRoot)
         {
             var monoBehaviour = ReferenceTarget;
@@ -172,6 +221,11 @@ public class EventAggregator : IEventAggregator
             return monoBehaviour.transform.root == commonRoot || CheckParents(monoBehaviour.transform, commonRoot);
         }
 
+        /// <summary>
+        /// Send the message to the reference target
+        /// </summary>
+        /// <param name="message">The message to be sent</param>
+        /// <returns>True if the message was sent without problems</returns>
         public bool Handle(object message)
         {
             var monoBehaviour = ReferenceTarget;
@@ -183,6 +237,12 @@ public class EventAggregator : IEventAggregator
             return true;
         }
 
+        /// <summary>
+        /// Walks the transform hierarchy and tries to figure out if we can find the wanted transform there
+        /// </summary>
+        /// <param name="currentTransform">The current transform we are checking right now</param>
+        /// <param name="wantedTransform">The ancestor we are looking for</param>
+        /// <returns>True if the wanted transform was found in the hierarchy</returns>
         private static bool CheckParents(Transform currentTransform, Transform wantedTransform)
         {
             while (true)

@@ -4,6 +4,7 @@
 // PARTICULAR PURPOSE.
 //
 // Created by Fredrik Lindh (Temaran)
+// Contact me at: temaran (at) gmail (dot) com
 // Last changed: 2014-03-15
 // You're free to do whatever you want with the code except claiming it's you who wrote it.
 // I would also appreciate it if you kept this file header as a thank you for the code :)
