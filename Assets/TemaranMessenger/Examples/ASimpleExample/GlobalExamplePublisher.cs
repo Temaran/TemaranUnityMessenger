@@ -16,7 +16,7 @@ Try adding another listener by pressing the button!";
 
     public void OnGUI()
     {
-        GUI.TextField(new Rect(0, 0, 1000, 800), 
+        GUI.TextField(new Rect(0, 0, 1000, 800),
 @"You can send global messages like this, everyone who registered for the message in the current scene will get it. 
 There are many reasons why you would want to use this over the other options you have available:
 
@@ -25,7 +25,7 @@ There are many reasons why you would want to use this over the other options you
    (for example, different types of health scripts) you do not have to remember to modify the weapon script to look for these 
    new types. Everything is done client side (the new health script implements a handle for the damage-message, and you're done). 
    Refactoring communication code has never been this easy. 
-   It also promotes reuseability, since your components only need to know their input / output messages, and hold very few direct references. 
+   It also promotes re-usability, since your components only need to know their input / output messages, and hold very few direct references. 
    This means it is very easy to move a complete component between projects.
 2. Easy to test since you can mock simply by sending dummy messages.
 3. It is MUCH faster, since almost everything here is cached, and it is only ever bothering objects that are interested.
@@ -61,7 +61,6 @@ public class ExampleSubscriber : MonoBehaviourEx, IHandle<ExampleMessage>
     }
 }
 ");
-
         if (GUI.Button(new Rect(1010, 0, 300, 50), "Add new listener!"))
         {
             Instantiate(LolPrefab);
