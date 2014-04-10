@@ -29,13 +29,13 @@ public interface IEventAggregator
     ///   Subscribes an instance to all events declared through implementations of <see cref = "IHandle{T}" />
     /// </summary>
     /// <param name = "subscriber">The instance to subscribe for event publication.</param>
-    void Subscribe(MonoBehaviourEx subscriber);
+    void Subscribe(object subscriber);
 
     /// <summary>
     ///   Unsubscribes the instance from all events.
     /// </summary>
     /// <param name = "subscriber">The instance to unsubscribe.</param>
-    void Unsubscribe(MonoBehaviourEx subscriber);
+    void Unsubscribe(object subscriber);
 
     /// <summary>
     ///   Publishes a message.

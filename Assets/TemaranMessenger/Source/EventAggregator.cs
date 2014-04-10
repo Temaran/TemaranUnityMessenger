@@ -39,7 +39,7 @@ public class EventAggregator : IEventAggregator
     ///   Subscribes an instance to all events declared through implementations of <see cref = "IHandle{T}" />
     /// </summary>
     /// <param name = "subscriber">The instance to subscribe for event publication.</param>
-    public virtual void Subscribe(MonoBehaviourEx subscriber)
+    public virtual void Subscribe(object subscriber)
     {
         if (subscriber == null)
         {
@@ -71,7 +71,7 @@ public class EventAggregator : IEventAggregator
     ///   Unsubscribes the instance from all events.
     /// </summary>
     /// <param name = "subscriber">The instance to unsubscribe.</param>
-    public virtual void Unsubscribe(MonoBehaviourEx subscriber)
+    public virtual void Unsubscribe(object subscriber)
     {
         if (subscriber == null)
         {
@@ -166,13 +166,8 @@ public class EventAggregator : IEventAggregator
         /// <summary>
         /// This is true if our target was garbage collected. In this case, this handle is not needed anymore
         /// </summary>
-        public bool IsDead { get { return ReferenceTarget == null; } }
+        public bool IsDead { get { return _reference.Target == null; } }
 
-        /// <summary>
-        /// This is the object our handle is taking care of.
-        /// </summary>
-        private MonoBehaviourEx ReferenceTarget { get { return _reference.Target as MonoBehaviourEx; } }
-        
         private readonly Action<object, object> _handleDelegate;
         private readonly WeakReference _reference;
         
@@ -200,9 +195,9 @@ public class EventAggregator : IEventAggregator
         /// </summary>
         /// <param name="instance">Is this instance the same as the one this handle is handling requests for?</param>
         /// <returns>True if they are the same</returns>
-        public bool Matches(MonoBehaviourEx instance)
+        public bool Matches(object instance)
         {
-            return ReferenceTarget == instance;
+            return _reference.Target == instance;
         }
 
         /// <summary>
@@ -212,9 +207,13 @@ public class EventAggregator : IEventAggregator
         /// <returns>True if the commonRoot transform is an ancestor to our reference target</returns>
         public bool SharesCommonTransformRoot(Transform commonRoot)
         {
-            var monoBehaviour = ReferenceTarget;
-            if (ReferenceTarget == null)
+            if (_reference.Target == null)
                 return false;
+
+            var monoBehaviour = _reference.Target as MonoBehaviour;
+
+            if (monoBehaviour == null)
+                return true; //If our target isn't a monobehaviour, it is always eligable
 
             //The common root is the transform hierarchy root, this is probably the most common choice, so let's check this first :)
             //Otherwise, check recursively for a common root
@@ -228,8 +227,11 @@ public class EventAggregator : IEventAggregator
         /// <returns>True if the message was sent without problems</returns>
         public bool Handle(object message)
         {
-            var monoBehaviour = ReferenceTarget;
-            if (monoBehaviour == null || monoBehaviour.gameObject == null)
+            if (_reference.Target == null)
+                return false;
+
+            var monoBehaviour = _reference.Target as MonoBehaviour;
+            if (monoBehaviour != null && monoBehaviour.gameObject == null)
                 return false;
 
             _handleDelegate(monoBehaviour, message);

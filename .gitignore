@@ -6,6 +6,7 @@ Obj/
 UnityGenerated/
 Library/
 *.csproj
+*.sln
  
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
