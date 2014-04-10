@@ -170,7 +170,7 @@ public class EventAggregator : IEventAggregator
 
         private readonly Action<object, object> _handleDelegate;
         private readonly WeakReference _reference;
-        
+
         /// <summary>
         /// Create a new handler
         /// </summary>
@@ -180,6 +180,7 @@ public class EventAggregator : IEventAggregator
         {
             _reference = new WeakReference(handler);
 
+#if !UNITY_IPHONE
             var methodInfo = interfaceType.GetMethod("Handle");
             var genericHelper = typeof(Handler).GetMethod("CreateWeaklyTypedDelegate", BindingFlags.Static | BindingFlags.NonPublic);
             //Create a generic method from the open genericHelper method we requested from our own class. This lets us specify our generic arguments in runtime
@@ -188,6 +189,7 @@ public class EventAggregator : IEventAggregator
             //The "constructedHelper" here is actually a runtime version of the CreateWeaklyTypedDelegate method that we are going to invoke! 
             //The null argument is used since it's a static method, and we send the methodinfo as per the signature of CreateWeaklyTypedDelegate(MethodInfo method)
             _handleDelegate = (Action<object, object>)constructedHelper.Invoke(null, new object[] { methodInfo });
+#endif
         }
 
         /// <summary>
@@ -234,7 +236,13 @@ public class EventAggregator : IEventAggregator
             if (monoBehaviour != null && monoBehaviour.gameObject == null)
                 return false;
 
+#if UNITY_IPHONE
+            //This is marginally slower than caching the delegate, maybe on average a couple of hundred ms for 10.000.000 runs, so not such a big deal :)
+            var method = _reference.Target.GetType().GetMethod("Handle", new[] { message.GetType() });
+            method.Invoke(_reference.Target, new[] { message });
+#else
             _handleDelegate(monoBehaviour, message);
+#endif
 
             return true;
         }
